@@ -3,178 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTZ 2026 | ADVANCED ADMIN TERMINAL</title>
-    
+    <title>DTZ 2026 | ADMIN ACCESS</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <style>
-        :root {
-            --primary: #ff003c;
-            --neon: #00ffcc;
-            --bg: #050508;
-            --glass: rgba(10, 10, 15, 0.92);
-            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
+        :root { --primary: #ff003c; --neon: #00ffcc; --bg: #050508; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Sinhala', sans-serif; }
+        body { background: var(--bg); color: white; min-height: 100vh; overflow-x: hidden; }
         
-        body { 
-            background: var(--bg); 
-            color: white; 
-            min-height: 100vh; 
-            overflow-x: hidden; 
-            display: flex;
-            flex-direction: column;
-        }
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; }
 
-        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.25; }
-
-        /* --- UI ANIMATIONS --- */
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
-
-        /* --- WELCOME SCREEN --- */
+        /* Welcome Screen Styling */
         #welcome-screen {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; background: radial-gradient(circle, #1a0a0a 0%, #050508 100%);
-            transition: opacity 0.8s ease;
         }
+        .portal-logo { font-family: 'Orbitron'; font-size: 3rem; color: white; text-shadow: 0 0 20px var(--primary); margin-bottom: 20px; }
+        .enter-btn { padding: 15px 50px; border: 1px solid var(--neon); background: transparent; color: var(--neon); font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
+        .enter-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 30px var(--neon); }
 
-        .portal-logo { 
-            font-family: 'Orbitron'; 
-            font-size: clamp(2.5rem, 10vw, 5rem); 
-            color: white; 
-            text-shadow: 0 0 20px var(--primary); 
-            animation: glitch 3s infinite;
-            letter-spacing: 4px;
-        }
+        /* Main Container Styling */
+        .container { max-width: 600px; margin: 50px auto; padding: 30px; background: rgba(0,0,0,0.9); border: 1px solid var(--primary); border-radius: 5px; backdrop-filter: blur(10px); display: none; }
+        h2 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 25px; }
+        .group { margin-bottom: 20px; }
+        label { display: block; color: var(--neon); font-size: 12px; margin-bottom: 5px; font-family: 'Share Tech Mono'; }
+        input, textarea { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 3px; outline: none; }
+        input:focus { border-color: var(--neon); }
 
-        .year-tag { 
-            background: var(--primary); 
-            color: white; 
-            padding: 6px 20px; 
-            font-family: 'Orbitron'; 
-            font-size: 14px; 
-            margin-bottom: 25px; 
-            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
-        }
-
-        .enter-btn { 
-            padding: 18px 70px; 
-            border: 1px solid var(--neon); 
-            background: transparent; 
-            color: var(--neon); 
-            font-family: 'Orbitron'; 
-            cursor: pointer; 
-            font-size: 1.1rem; 
-            transition: var(--transition);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .enter-btn:hover { 
-            background: var(--neon); 
-            color: black; 
-            box-shadow: 0 0 50px var(--neon);
-            transform: scale(1.1);
-        }
-
-        /* --- FORM CONTAINER --- */
-        .container { 
-            max-width: 650px; 
-            width: 92%;
-            margin: 50px auto; 
-            padding: 40px; 
-            background: var(--glass); 
-            border: 1px solid rgba(255, 0, 60, 0.3); 
-            border-radius: 8px; 
-            backdrop-filter: blur(20px); 
-            display: none; 
-            box-shadow: 0 20px 80px rgba(0,0,0,0.5);
-        }
-
-        h2 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 30px; letter-spacing: 3px; }
-
-        .group { margin-bottom: 22px; position: relative; }
+        .img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .submit-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        label { 
-            display: block; 
-            color: var(--neon); 
-            font-size: 11px; 
-            margin-bottom: 8px; 
+        #status { font-family: 'Share Tech Mono'; color: var(--neon); padding: 10px; border: 1px dashed var(--neon); margin-top: 15px; display: none; font-size: 12px; }
+        
+        /* Updated Footer Style */
+        footer { 
+            padding: 40px 20px; 
+            text-align: center; 
             font-family: 'Share Tech Mono'; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: #888; 
+            border-top: 1px solid rgba(255, 0, 60, 0.2);
+            margin-top: 50px;
         }
-
-        input, textarea { 
-            width: 100%; 
-            padding: 14px; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            color: white; 
-            outline: none;
-            transition: border 0.3s;
-            border-radius: 4px;
-        }
-
-        input:focus, textarea:focus { border-color: var(--neon); background: rgba(0, 255, 204, 0.02); }
-
-        .img-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; 
-            margin-top: 10px; 
-        }
-
-        .pic-input { font-size: 10px; padding: 10px; cursor: pointer; }
-        
-        .submit-btn { 
-            width: 100%; 
-            padding: 20px; 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            font-family: 'Orbitron'; 
-            font-weight: 700; 
-            cursor: pointer; 
-            margin-top: 30px;
-            transition: var(--transition);
-            text-transform: uppercase;
-        }
-
-        .submit-btn:hover:not(:disabled) { filter: brightness(1.2); letter-spacing: 2px; }
-        .submit-btn:disabled { background: #222; color: #555; cursor: not-allowed; }
-        
-        #status { 
-            font-family: 'Share Tech Mono'; 
-            color: var(--neon); 
-            padding: 15px; 
-            border-left: 3px solid var(--neon); 
-            background: rgba(0, 255, 204, 0.05);
-            margin-top: 25px; 
-            display: none; 
-            font-size: 13px;
-        }
-
-        footer { padding: 40px; text-align: center; font-family: 'Share Tech Mono'; font-size: 11px; color: #444; }
-        footer span { color: var(--primary); }
-
-        /* Responsive */
-        @media (max-width: 500px) {
-            .container { padding: 25px; margin: 20px auto; }
-            .img-grid { grid-template-columns: 1fr; }
-        }
+        .footer-title { color: var(--primary); font-weight: bold; font-family: 'Orbitron'; letter-spacing: 2px; margin-bottom: 10px; }
+        .footer-devs span { color: var(--neon); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -186,33 +62,19 @@
     </audio>
 
     <div id="welcome-screen">
-        <div class="year-tag">SYSTEM ONLINE 2026</div>
         <div class="portal-logo">DTZ CRIMINAL</div>
-        <p style="font-family: 'Share Tech Mono'; color: #666; margin-bottom: 35px; letter-spacing: 3px;">ENCRYPTED ADMISSION GATEWAY</p>
-        <button class="enter-btn" onclick="initPortal()">INITIALIZE SYSTEM</button>
+        <button class="enter-btn" onclick="initPortal()">ENTER SYSTEM</button>
     </div>
 
     <div class="container" id="main-portal">
-        <h2>RECRUITMENT TERMINAL</h2>
+        <h2>ADMISSION 2026</h2>
         <form id="admissionForm">
-            <div class="group">
-                <label>MEMBER CODENAME (නම)</label>
-                <input type="text" id="name" placeholder="Agent Alias" required>
-            </div>
-            <div class="group">
-                <label>WHATSAPP (format: 947xxxxxxxx)</label>
-                <input type="tel" id="whatsapp" pattern="[0-9]{10,15}" placeholder="947..." required>
-            </div>
-            <div class="group">
-                <label>CURRENT SECTOR (නගරය)</label>
-                <input type="text" id="city" placeholder="City/Region" required>
-            </div>
-            <div class="group">
-                <label>INTEL PROFILE (අමතර විස්තර)</label>
-                <textarea id="details" rows="3" placeholder="Specialties & Skills..."></textarea>
-            </div>
+            <div class="group"><label>NAME (නම)</label><input type="text" id="name" required></div>
+            <div class="group"><label>WHATSAPP (format: 947xxxxxxxx)</label><input type="tel" id="whatsapp" required></div>
+            <div class="group"><label>CITY (නගරය)</label><input type="text" id="city" required></div>
+            <div class="group"><label>DETAILS (විස්තර)</label><textarea id="details" rows="3"></textarea></div>
 
-            <label>VISUAL VERIFICATION (4 IMAGES)</label>
+            <label>IDENTIFICATION PHOTOS (4 REQUIRED)</label>
             <div class="img-grid">
                 <input type="file" class="pic-input" accept="image/*" required>
                 <input type="file" class="pic-input" accept="image/*" required>
@@ -220,23 +82,19 @@
                 <input type="file" class="pic-input" accept="image/*" required>
             </div>
 
-            <button type="submit" id="submitBtn" class="submit-btn">UPLOAD TO MAINFLAME</button>
+            <button type="submit" id="submitBtn" class="submit-btn">PROCEED TO UPLOAD</button>
         </form>
         <div id="status"></div>
     </div>
 
     <footer>
-        <p>SECURE TERMINAL VERSION 4.0.26</p>
-        <p>CORE BY <span>RAVIYA</span> • <span>SHAGIYA</span> • <span>ASHIYA</span></p>
-        <p>© 2026 DTZ GLOBAL SECURITY HQ</p>
+        <div class="footer-title">2026 DTZ ADMISSION WEB</div>
+        <div class="footer-devs">Developed by <span>RAVIYA</span> , <span>SHAGIYA</span> , <span>ASHIYA</span></div>
     </footer>
 
     <script>
-        /**
-         * LOGIC ENGINE - DTZ 2026
-         */
-
-        // 1. Firebase Configuration
+        // Configuration
+        const admins = ["94761527735", "94788262515", "94741856766", "94704239576", "94778430626"];
         const firebaseConfig = {
             apiKey: "AIzaSyDulliK5zrr2U-0Hl9EzrWrojka1VxodOk",
             authDomain: "free-code-bf1c2.firebaseapp.com",
@@ -251,28 +109,22 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const storage = firebase.storage();
-        const admins = ["94761527735", "94788262515", "94741856766", "94704239576", "94778430626"];
 
-        // 2. UI Actions
         function initPortal() {
             document.getElementById('crimAudio').play().catch(() => {});
-            document.getElementById('welcome-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('welcome-screen').style.display = 'none';
-                document.getElementById('main-portal').style.display = 'block';
-            }, 500);
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('main-portal').style.display = 'block';
         }
 
-        // 3. Data Processing
+        // Handle Form Submission
         document.getElementById('admissionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
-            const fileInputs = document.querySelectorAll('.pic-input');
             
             btn.disabled = true;
             status.style.display = 'block';
-            status.innerHTML = "> ACCESSING ENCRYPTED CLOUD...";
+            status.innerHTML = "> INITIATING SECURE CONNECTION...";
 
             const name = document.getElementById('name').value;
             const phone = document.getElementById('whatsapp').value.replace(/\D/g,'');
@@ -280,72 +132,68 @@
             let photoUrls = [];
 
             try {
-                // Upload Loop
+                const inputs = document.querySelectorAll('.pic-input');
+                
+                // Fix: Properly loop and wait for each photo upload and URL generation
                 for(let i=0; i<4; i++) {
-                    status.innerHTML = `> UPLOADING EVIDENCE ${i+1}/4...`;
+                    status.innerHTML = `> UPLOADING INTEL ${i+1}/4...`;
+                    const file = inputs[i].files[0];
                     const ref = storage.ref(`2026_admissions/${name}_${time}/intel_${i}`);
-                    await ref.put(fileInputs[i].files[0]);
-                    photoUrls.push(await ref.getDownloadURL());
+                    
+                    // Upload file and wait for completion
+                    const snapshot = await ref.put(file);
+                    // Get URL and wait
+                    const url = await snapshot.ref.getDownloadURL();
+                    photoUrls.push(url);
                 }
 
-                // Database Entry
-                status.innerHTML = "> WRITING TO REALTIME LEDGER...";
                 const memberData = {
-                    name, phone, 
+                    name, phone,
                     city: document.getElementById('city').value,
                     details: document.getElementById('details').value,
                     photos: photoUrls,
-                    status: "PENDING",
                     timestamp: new Date().toLocaleString()
                 };
 
+                status.innerHTML = "> SYNCING TO CLOUD DATABASE...";
                 await db.ref('members_2026/' + time).set(memberData);
 
-                // WhatsApp Dispatch
-                const primaryAdmin = admins[4]; 
-                const text = `*🛡️ DTZ 2026 ADMISSION 🛡️*\n\n` +
-                             `👤 *NAME:* ${memberData.name}\n` +
-                             `📱 *WA:* ${memberData.phone}\n` +
-                             `📍 *CITY:* ${memberData.city}\n\n` +
-                             `*📂 LINKS:* \n${photoUrls.join('\n')}`;
+                // Prepare WhatsApp Message
+                const targetAdmin = admins[4]; // Sending to Ashiya's number
+                const msg = encodeURIComponent(
+                    `*🛡️ 2026 DTZ ADMISSION 🛡️*\n\n` +
+                    `👤 *Agent:* ${memberData.name}\n` +
+                    `📱 *WA:* ${memberData.phone}\n` +
+                    `📍 *City:* ${memberData.city}\n\n` +
+                    `*🖼️ PHOTO EVIDENCE:*\n${photoUrls.join('\n')}`
+                );
 
-                status.innerHTML = "> DATA SYNCED. REDIRECTING...";
+                status.innerHTML = "> MISSION SUCCESS. REDIRECTING...";
                 setTimeout(() => {
-                    window.location.href = `https://wa.me/${primaryAdmin}?text=${encodeURIComponent(text)}`;
+                    window.location.href = `https://wa.me/${targetAdmin}?text=${msg}`;
                 }, 1000);
 
             } catch (err) {
-                status.innerHTML = "> CRITICAL FAILURE: " + err.message;
+                status.innerHTML = "> CRITICAL ERROR: " + err.message;
                 btn.disabled = false;
             }
         });
 
-        // 4. Matrix Engine
+        // Matrix Animation Logic
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        const columns = Math.floor(w / 20);
-        const drops = Array(columns).fill(1);
-
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const drops = Array(Math.floor(canvas.width/20)).fill(1);
         function draw() {
-            ctx.fillStyle = 'rgba(5, 5, 8, 0.1)';
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#ff003c';
-            ctx.font = '14px Share Tech Mono';
             drops.forEach((y, i) => {
-                const char = Math.random() > 0.5 ? "DTZ" : "X";
-                ctx.fillText(char, i * 20, y * 20);
-                if (y * 20 > h && Math.random() > 0.98) drops[i] = 0;
+                ctx.fillText("DTZ", i*20, y*20);
+                if(y*20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             });
         }
         setInterval(draw, 50);
-
-        window.addEventListener('resize', () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        });
     </script>
 </body>
 </html>
